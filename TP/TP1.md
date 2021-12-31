@@ -1,6 +1,7 @@
 # Docker - TP1 : Découverte de Docker
 > **Objectifs du TP** :
->- Apprendre à manipuler des containers
+- Apprendre à manipuler des containers
+- Apprendre à manipuler des images
 
 
 ## 1- Vérification de l'installation
@@ -116,7 +117,7 @@ CONTAINER ID   IMAGE     COMMAND             CREATED          STATUS          PO
 
 ### Lister tous les containers présents sur notre machine
 ```shell
-$ docker ps --all
+$ docker ps -a
 
 CONTAINER ID   IMAGE                              COMMAND                  CREATED          STATUS                          PORTS                               NAMES
 6c2d4482247d   busybox                            "ping google.com"        2 minutes ago    Exited (0) About a minute ago                                       admiring_kapitsa
@@ -200,3 +201,25 @@ docker exec –it <container_id> sh
 ````
 
 Cette dernière commande est très pratique et souvent utilisée
+
+## 5- Manipuler des images
+
+### Lister les images présentes sur notre machine :
+```shell
+$ docker image ls  
+```
+ou
+````shell
+$ docker images
+````
+
+### Supprimer une ou plusieurs images :
+```shell
+$ docker images
+REPOSITORY                         TAG       IMAGE ID       CREATED        SIZE
+<none>                             <none>    2b75bde0dd1f   2 hours ago    475MB
+$ docker image rm 2b75bde0dd1f
+Deleted: sha256:2b75bde0dd1f34f5cab04f685281dfda5fa64945830d04d5753b76d9a06efbfb
+```
+Si une erreur s'affiche, c'est que l'image est utilisé par un container stoppé. Il faut donc d'abord supprimer le container 
+puis supprimer l'image ensuite
