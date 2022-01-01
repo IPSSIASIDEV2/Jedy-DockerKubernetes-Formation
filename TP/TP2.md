@@ -147,7 +147,7 @@ Pour mapper un port, on peut ajouter l'option `-p` à la commande `docker run`:
 $ docker run -p 5000:8000 <votre_tag>
 `````
 
-Cette option signifie : Redirige les requêtes sur le port 8000 local vers le port 8000 au sein du container.
+Cette option signifie : Redirige les requêtes sur le port 5000 local vers le port 8000 au sein du container.
 Il n'est pas obligé de spécifier le même port local que celui au sein du container.
 
 Lancez la commande et vérifier que le serveur est bien accessible sur le navigateur à l'URL localhost:5000.
