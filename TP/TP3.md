@@ -201,7 +201,7 @@ Relancez maintenant la commande `docker-compose up --build`. Normalement, aucune
 
 On constate que les tables de la base se créent et les services `back` et `front` se lancent sans problème.
 
-On peut vérifier que les containers sont bien en cours d'éxecution en lançant la commande : 
+On peut vérifier que les containers sont bien en cours d'éxécution en lançant la commande : 
 
 ````shell
 $ docker-compose ps  
@@ -214,15 +214,17 @@ Rendez-vous sur votre navigateur à l'URL `http://localhost:3000/`, le port 3000
 
 Créez un compte, puis naviguez sur l'app.
 
+Les containers fonctionnent bien et communiquent entre eux.
+
 ## 7- Volumes Database
 
 Tout d'abord, stoppez les containers en cours avec la commande `docker-compose down`
 
 Relancez ensuite les containers avec la commande `docker-compose up -d`
 
-Naviguez sur l'app, cliquez sur le boutton déconnexion, puis essayez de vous reconnecter avec le compte précédemment crée.
+Naviguez sur l'app, cliquez sur le bouton déconnexion, puis essayez de vous reconnecter avec le compte précédemment crée.
 
-Une erreur s'affiche, ce compte n'existe pas dans le base.
+Une erreur s'affiche, ce compte n'existe pas dans la base.
 
 En réalité, c'est logique. En effet, nous n'avons pas mis en place de `volumes` sur le service `database`.
 
@@ -297,10 +299,10 @@ Pour cela, modifiez les services `back` et `front`:
     depends_on:
       - database
     restart: "on-failure"
-    # Indique à Docker de répercuter les changements intervenants dans le dossier front
+    # Indique à Docker de répercuter les changements intervenants dans le dossier back
     # au sein du dossier app du container
     volumes:
-      - "./front:/app"
+      - "./back:/app"
     environment:
       - API_ENTRYPOINT=https://swapi.dev/api
       - JWT_SECRET=MyBestSecret
@@ -311,10 +313,10 @@ Pour cela, modifiez les services `back` et `front`:
     tty: true
     stdin_open: true
     restart: "on-failure"
-    # Indique à Docker de répercuter les changements intervenants dans le dossier back
+    # Indique à Docker de répercuter les changements intervenants dans le dossier front
     # au sein du dossier app du container
     volumes:
-      - "./back:/app"
+      - "./front:/app"
     ports:
       - 3000:3000
     depends_on:
@@ -374,8 +376,8 @@ Pour la deuxième, modifier les services comme ceci :
       # mais utilise ceux au sein du container
       - "/app/node_modules"
       
-      # Signifie à Docker : Récupérer les fichiers du dossier front et répercute-les au sein du container
-      - "./front:/app"
+      # Signifie à Docker : Récupérer les fichiers du dossier back et répercute-les au sein du container
+      - "./back:/app"
         
       # si on met des deux points, cela signifie surcharge, sinon cela signifie ne surcharge pas
         
@@ -391,11 +393,18 @@ Pour la deuxième, modifier les services comme ceci :
     restart: "on-failure"
     volumes:
       - "/app/node_modules"
-      - "./back:/app"
+      - "./front:/app"
     ports:
       - 3000:3000
     depends_on:
       - back
 `````
 
+De cette façon, vous n'êtes pas obligés d'installer les node_modules en local sur votre machine
+
 Stoppez les containers, puis lancez-les de nouveau avec la commande de build.
+
+Les containers se lancent de nouveau sans erreurs.
+
+Essayez maintenant de modifier un fichier du back ou du front. Vous devriez voir l'app se recharger
+
