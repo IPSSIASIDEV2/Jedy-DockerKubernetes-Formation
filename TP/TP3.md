@@ -515,8 +515,8 @@ build_back:
   stage: build
   extends: .docker-login
   script:
-    # utilise le Dockerfile.prod du back
-    - docker build -t elie91/webapp-back -f back/Dockerfile.prod  .
+    # l'option -f sert à spécifier le Dockerfile utilisé
+    - docker build -t elie91/webapp-back -f back/Dockerfile.prod  ./back
     # Push l'image sur Docker Hub
     - docker push elie91/webapp-back
   only:
@@ -527,8 +527,8 @@ build_front:
   stage: build
   extends: .docker-login
   script:
-    # utilise le Dockerfile.prod du back
-    - docker build -t elie91/webapp-front -f front/Dockerfile.prod  .
+    # l'option -f sert à spécifier le Dockerfile utilisé
+    - docker build -t elie91/webapp-front -f front/Dockerfile.prod  ./front
     # Push l'image sur Docker Hub
     - docker push elie91/webapp-front
   only:
