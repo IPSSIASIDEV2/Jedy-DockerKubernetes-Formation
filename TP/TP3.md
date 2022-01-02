@@ -119,6 +119,9 @@ services:
     # Map le port 3000 local au port 3000 du container
     ports:
       - 3000:3000
+    # Définit des variables d'environnement nécessaires au fonctionnement du front
+    environment:
+      - REACT_APP_API_ENTRYPOINT=http://localhost:4000
     # Indique une dépendance avec le service back
     depends_on:
       - back
@@ -226,17 +229,13 @@ Relancez ensuite les containers avec la commande `docker-compose up -d`
 
 Naviguez sur l'app, cliquez sur le bouton déconnexion, puis essayez de vous reconnecter avec le compte précédemment crée.
 
-Une erreur s'affiche, ce compte n'existe pas dans la base.
-
-En réalité, c'est logique. En effet, nous n'avons pas mis en place de `volumes` sur le service `database`.
+Une erreur s'affiche, ce compte n'existe pas dans la base. En réalité, c'est logique. En effet, nous n'avons pas mis en place de `volumes` sur le service `database`.
 
 Les `volumes` sont le mécanisme préféré pour conserver les données générées et utilisées par les conteneurs Docker.
 
 Il faut donc créer des volumes, qui vont sauvegarder sur notre machine les données générées par postgres.
 
-Tout d'abord, stoppez les containers en cours.
-
-Puis, modifiez le service `database` : 
+Tout d'abord, stoppez les containers en cours. Puis, modifiez le service `database` : 
 
 ````yaml
   database:
@@ -285,9 +284,7 @@ Vous pouvez supprimer les volumes avec la commande `docker volume prune`
 
 Essayez maintenant en ayant les logs des containers sur votre terminal de modifier un fichier du back ou du front.
 
-On constate que la modification n'est pas prise en compte, et que le back ou le front ne se relance pas.
-
-La encore, il s'agit d'un problème lié aux volumes.
+On constate que la modification n'est pas prise en compte, et que le back ou le front ne se relance pas. La encore, il s'agit d'un problème lié aux volumes.
 
 Il faut trouvez un moyen de dire à Docker: dés qu'un fichier est modifié sur ma machine, répercute ce changement au sein du container.
 
@@ -315,6 +312,8 @@ Pour cela, modifiez les services `back` et `front`:
     tty: true
     stdin_open: true
     restart: "on-failure"
+    environment:
+      - REACT_APP_API_ENTRYPOINT=http://localhost:4000
     # Indique à Docker de répercuter les changements intervenants dans le dossier front
     # au sein du dossier app du container
     volumes:
@@ -393,7 +392,11 @@ Pour la deuxième, modifier les services comme ceci :
     tty: true
     stdin_open: true
     restart: "on-failure"
+    environment:
+      - REACT_APP_API_ENTRYPOINT=http://localhost:4000
     volumes:
+      # Signifie à Docker : ne tente pas de récupérer les node_modules sur notre machine
+      # mais utilise ceux au sein du container
       - "/app/node_modules"
       - "./front:/app"
     ports:
@@ -404,9 +407,148 @@ Pour la deuxième, modifier les services comme ceci :
 
 De cette façon, vous n'êtes pas obligés d'installer les node_modules en local sur votre machine
 
-Stoppez les containers, puis lancez-les de nouveau avec la commande de build.
-
-Les containers se lancent de nouveau sans erreurs.
+Stoppez les containers, puis lancez-les de nouveau avec la commande de build. Les containers se lancent de nouveau sans erreurs.
 
 Essayez maintenant de modifier un fichier du back ou du front. Vous devriez voir l'app se recharger
+
+## 9 - Workflow de production
+
+Dans le cadre d'un vrai projet, il est crucial de mettre en place un déploiement continue. Certains cloud providers permettent de déployer directement des containers docker.
+
+Dans cette section, nous allons voir les étapes de bases pour mettre en place un déploiement continu basé sur des containers docker.
+
+Tout d'abord, il faut créer des fichiers Dockerfile de production. En effet, nous voulons que le build du container soit différent dans le cas
+d'une mise en production.
+
+Nous n'allons pas réellement déployer le projet, mais juste voir les étapes nécessaires à sa réalisation
+
+Dans le dossier back, créez un nouveau fichier appelé `Dockerfile.prod` avec le contenu suivant : 
+
+`````dockerfile
+FROM node:alpine
+WORKDIR "/app"
+ARG API_ENTRYPOINT=https://swapi.dev/api
+ARG JWT_SECRET=MyBestSecret
+ARG DATABASE_URL="database url de prod"
+COPY package.json .
+RUN npm install
+COPY . .
+CMD ["npm", "prod"]
+
+`````
+
+Etant donné que l'on ne passe pas par un docker-compose, il faut mettre manuellement les variables d'environnement
+
+Dans le dossier front, créez un nouveau fichier appelé `Dockerfile.prod` avec le contenu suivant :
+
+`````dockerfile
+# Dockerfile multi étapes
+
+FROM node:alpine
+WORKDIR '/app'
+ARG REACT_APP_API_ENTRYPOINT=http://localhost:4000
+COPY package.json .
+RUN npm install
+COPY . .
+# Build le projet
+RUN npm build
+
+# Utilise l'image de base nginx
+FROM nginx
+EXPOSE 3000
+# Copie le fichier de configuration que nous allons créer dans le container
+COPY docker/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+# Copie les fichiers de build dans le dossier du container
+COPY --from=0 /app/build /usr/share/nginx/html
+`````
+
+Dans une mise en production d'une application react, on veut build l'app et récupérer uniquement le contenu statique.
+Nous avons besoin d'un serveur web pour rediriger les requêtes sur le fichier `index.html`.
+
+C'est pour cela que dans le Dockerfile de production, cela se passe en deux étapes: une de build, et une de routage, dans
+laquelle `nginx` va mettre le contenu de l'étape précédente dans un dossier spécifique et diriger les requêtes à l'intérieur
+
+A la racine, créez un fichier ``default.conf`` dans les dossiers `docker/nginx/conf.d/default.conf`: 
+
+`````editorconfig
+server {
+    listen 3000;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+}
+`````
+
+
+Pour la suite, dans le cas d'un déploiement continue avec `gitlab`, il faut créez pour cela un fichier `.gitlab-ci.yml` avec le contenu suivant : 
+
+`````yaml
+# Utilise une image Docker pour accèder à docker dans la suite
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - test
+  - build
+  - deploy
+
+# Etape de test
+test:
+  stage: test
+  script: echo "Running tests"
+  only:
+    - master
+
+# Se connecte à docker, nécessite d'avoir renseigné dans gitlab 
+# les variables DOCKER_USERNAME et DOCKER_PASSWORD
+.docker-login:
+  before_script:
+    - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+
+# Build l'image du back
+build_back:
+  stage: build
+  extends: .docker-login
+  script:
+    # utilise le Dockerfile.prod du back
+    - docker build -t elie91/webapp-back -f back/Dockerfile.prod  .
+    # Push l'image sur Docker Hub
+    - docker push elie91/webapp-back
+  only:
+    - master
+
+# Build l'image du front
+build_front:
+  stage: build
+  extends: .docker-login
+  script:
+    # utilise le Dockerfile.prod du back
+    - docker build -t elie91/webapp-front -f front/Dockerfile.prod  .
+    # Push l'image sur Docker Hub
+    - docker push elie91/webapp-front
+  only:
+    - master
+
+deploy_prod:
+  stage: deploy
+  image: google/cloud-sdk
+  script:
+    - echo "Deploy to production server"
+    # Nous n'irons pas plus loin
+    # Mais vous pouvez accèder à vos images de production pour les déployer sur un cloud provider
+  environment:
+    name: prod
+    url: https://$CI_ENVIRONMENT_SLUG.$CI_PROJECT_NAME.$MY_DOMAIN
+  only:
+    - master
+`````
+
+
+Fin du TP
+
 
