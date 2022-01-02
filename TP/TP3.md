@@ -1,11 +1,13 @@
 # Docker - TP3 : Projet avec Docker Compose 
 > **Sommaire du TP** :
 >- Cloner le repository
->- Créer le Dockerfile Back
 >- Créer le Dockerfile Front
+>- Créer le Dockerfile Back
 >- Créer le Docker Compose
 >- Lancer le projet
 >- Ajouter les variables d'environnement
+>- Volumes de la base de données
+>- Volumes des app back et front
 >- Mise en place d'un workflow de production
 
 ## 0 - Vérifier l'installation
