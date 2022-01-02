@@ -1,0 +1,34 @@
+# Spécifie la version du docker-compose
+version: "3.6"
+
+# Liste des services docker qui composent notre app
+services:
+
+  # Définit le nom du service
+  postgres:
+    # Définit l'image à utiliser
+    image: postgres:12-alpine
+    # Définit le mapping de ports
+    ports:
+      - 7082:5432
+    # Spécifie les variables d'environnement
+    environment:
+      - PGDATA=/data/postgres
+      - POSTGRES_DB=star_wars
+      - POSTGRES_USER=star_wars_user
+      - POSTGRES_PASSWORD=star_wars_password
+
+  # Définit le nom du service
+  back:
+    # Spécifie à quel endroit se trouve le Dockerfile pour build l'image
+    build: "back"
+    # Spécifie le répertoire de travail par défault
+    working_dir: "/app"
+    # Définit le mapping de ports
+    ports:
+      - 4000:4000
+    # Exprime une dépendance avec le service postgres
+    # Le service postgres se lancera avec le service back
+    depends_on:
+      - postgres
+
