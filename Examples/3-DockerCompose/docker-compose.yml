@@ -22,13 +22,13 @@ services:
   back:
     # Spécifie à quel endroit se trouve le Dockerfile pour build l'image
     build: "back"
-    # Spécifie le répertoire de travail par défault
+    # Spécifie le répertoire de travail par défaut
     working_dir: "/app"
     # Définit le mapping de ports
     ports:
       - 4000:4000
     # Exprime une dépendance avec le service postgres
-    # Le service postgres se lancera avec le service back
+    # Le service postgres se lancera avant le service back
     depends_on:
       - postgres
 

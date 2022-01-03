@@ -170,7 +170,7 @@ La variable ``DATABASE_URL`` doit respecter le format suivant :
 
 `postgres://user:password@host:port/dbname`
 
-Egalement, l'image `postgres` s'attend à avoir les variables `POSTGRES_PASSWORD` et `POSTGRES_USER` définies.
+Également, l'image `postgres` s'attend à avoir les variables `POSTGRES_PASSWORD` et `POSTGRES_USER` définies.
 
 
 ## 6- Variables d'environnement
@@ -206,7 +206,7 @@ Relancez maintenant la commande `docker-compose up --build`. Normalement, aucune
 
 On constate que les tables de la base se créent et les services `back` et `front` se lancent sans problème.
 
-On peut vérifier que les containers sont bien en cours d'éxécution en lançant la commande : 
+On peut vérifier que les containers sont bien en cours d'exécution en lançant la commande : 
 
 ````shell
 $ docker-compose ps  
@@ -284,9 +284,9 @@ Vous pouvez supprimer les volumes avec la commande `docker volume prune`
 
 Essayez maintenant en ayant les logs des containers sur votre terminal de modifier un fichier du back ou du front.
 
-On constate que la modification n'est pas prise en compte, et que le back ou le front ne se relance pas. La encore, il s'agit d'un problème lié aux volumes.
+On constate que la modification n'est pas prise en compte, et que le back ou le front ne se relance pas. Là encore, il s'agit d'un problème lié aux volumes.
 
-Il faut trouvez un moyen de dire à Docker: dés qu'un fichier est modifié sur ma machine, répercute ce changement au sein du container.
+Il faut trouvez un moyen de dire à Docker : dès qu'un fichier est modifié sur ma machine, répercute ce changement au sein du container.
 
 Pour cela, modifiez les services `back` et `front`:
 
@@ -356,7 +356,7 @@ Or nous n'avons pas lancé la commande `npm install` en local (Le dossier `node_
 Le container ne trouve donc pas les dépendances. A ce stade, deux solutions existent : 
 
 * Installer les dépendances en local sur notre machine, qui seront copiés au sein du container
-* Dire à Docker de ne pas tenter de récupérer les dépendances sur notre machine mais d'utiliser les `node_modules` qui
+* Dire à Docker de ne pas tenter de récupérer les dépendances sur notre machine, mais d'utiliser les `node_modules` qui
 sont présents dans le container
 
 Les deux options sont valables. Pour la première, il suffit de lancer un coup de `npm install` dans les dossiers back et front.
@@ -413,7 +413,7 @@ Essayez maintenant de modifier un fichier du back ou du front. Vous devriez voir
 
 ## 9 - Workflow de production
 
-Dans le cadre d'un vrai projet, il est crucial de mettre en place un déploiement continue. Certains cloud providers permettent de déployer directement des containers docker.
+Dans le cadre d'un vrai projet, il est crucial de mettre en place un déploiement continue. Certains clouds providers permettent de déployer directement des containers docker.
 
 Dans cette section, nous allons voir les étapes de bases pour mettre en place un déploiement continu basé sur des containers docker.
 
@@ -465,7 +465,7 @@ COPY --from=0 /app/build /usr/share/nginx/html
 Dans une mise en production d'une application react, on veut build l'app et récupérer uniquement le contenu statique.
 Nous avons besoin d'un serveur web pour rediriger les requêtes sur le fichier `index.html`.
 
-C'est pour cela que dans le Dockerfile de production, cela se passe en deux étapes: une de build, et une de routage, dans
+C'est pour cela que dans le Dockerfile de production, cela se passe en deux étapes : une de build, et une de routage, dans
 laquelle `nginx` va mettre le contenu de l'étape précédente dans un dossier spécifique et diriger les requêtes à l'intérieur
 
 A la racine, créez un fichier ``default.conf`` dans les dossiers `docker/nginx/conf.d/default.conf`: 

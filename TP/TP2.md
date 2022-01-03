@@ -194,10 +194,10 @@ app.listen(8000, () => {
 
 Comme vous vous en doutez, pour que ce changement soit répercuté au sein du container, il faut le build de nouveau. Relancez donc la commande de build.
 
-On constate qu'étant donné que l'instruction ``COPY`` a été modifié, car il y'a un changement dans les fichiers à copier, Docker relance les instructions suivantes
-et réinstalle les dépendances du projet alors que celles ci n'ont pas changées.
+On constate qu'étant donné que l'instruction ``COPY`` a été modifié, car il y a un changement dans les fichiers à copier, Docker relance les instructions suivantes
+et réinstalle les dépendances du projet alors que celles-ci n'ont pas changées.
 
-Cette situation n'est pas idéale. Idéalement, on voudrait que ce soit seulement quand les dépendances ont changées que la commande `npm install` s'éxecute de nouveau.
+Cette situation n'est pas idéale. Idéalement, on voudrait que ce soit seulement quand les dépendances ont changées que la commande `npm install` s'exécute de nouveau.
 
 Pour cela, modifiez le ``Dockerfile`` par :  
 

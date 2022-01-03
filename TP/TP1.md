@@ -56,8 +56,8 @@ Le ``Docker Client`` ne trouvant pas l'image `hello-world` en cache sur notre ma
 Le Docker server a ensuite crée un container à partir de l'image téléchargé et a exécuté les instructions renseignées dans l'image pour afficher le message: 
 `Hello from Docker`
 
-Essayez maintenant de relancer la commande `docker run hello-world`. Vous pouvez constater que cette fois ci, le Docker client n'a pas téléchargé l'image de nouveau, 
-celle ci étant déjà présente en cache sur notre machine
+Essayez maintenant de relancer la commande `docker run hello-world`. Vous pouvez constater que cette fois-ci, le Docker client n'a pas téléchargé l'image de nouveau, 
+celle-ci étant déjà présente en cache sur notre machine
 
 
 ## 3- Surcharger la commande par défaut
@@ -78,7 +78,7 @@ Comme vous le constatez, en ajoutant un paramètre, on modifie la commande exéc
 
 Cela ne fonctionne pas, une erreur s'affiche. 
 
-En effet, rien n'existe dans le container créé à part une simple commande permettant d'afficher Hello world. A l'inverse, l'image Busybox crée des containers contenants
+En effet, rien n'existe dans le container créé à par une simple commande permettant d'afficher Hello world. À l'inverse, l'image Busybox crée des containers contenants
 des fichiers d'exploitation
 
 ## 4- Commandes de manipulation
