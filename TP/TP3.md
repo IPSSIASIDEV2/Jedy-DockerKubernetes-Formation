@@ -451,7 +451,7 @@ COPY package.json .
 RUN npm install
 COPY . .
 # Build le projet
-RUN npm build
+RUN npm run build
 
 # Utilise l'image de base nginx
 FROM nginx
