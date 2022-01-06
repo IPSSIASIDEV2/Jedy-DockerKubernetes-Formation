@@ -7,6 +7,6 @@ metadata:
 spec:
   containers:
     - name: client
-      image: elie91/webapp-front
+      image: elie91/starwars-front
       ports:
         - containerPort: 3000
