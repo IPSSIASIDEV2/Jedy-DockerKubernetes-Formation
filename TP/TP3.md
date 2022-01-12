@@ -91,7 +91,7 @@ services:
     restart: "on-failure"
     # Map le port 7082 local au port 5432 du container
     ports:
-      - 7082:5432
+      - "7082:5432"
 
   # service pour le back
   back:
@@ -99,7 +99,7 @@ services:
     build: "back"
     # Map le port 4000 local au port 4000 du container
     ports:
-      - 4000:4000
+      - "4000:4000"
     restart: "on-failure"
     # Indique une dépendance avec le service database
     depends_on:
@@ -118,7 +118,7 @@ services:
     stdin_open: true
     # Map le port 3000 local au port 3000 du container
     ports:
-      - 3000:3000
+      - "3000:3000"
     # Définit des variables d'environnement nécessaires au fonctionnement du front
     environment:
       - REACT_APP_API_ENTRYPOINT=http://localhost:4000
@@ -161,16 +161,17 @@ le fichier `back/lib/db.js`, celui ci essaye de créer la connexion en utilisant
 d'environnement :
 
 `````javascript
-const sequelize = new Sequelize(process.env.DATABASE_URL);
+const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
+  host: process.env.PGHOST,
+  port: process.env.PGPORT,
+  dialect: 'postgres'
+});
 `````
 
-Or nous n'avons pas défini cette variable.
-Il faut donc passer cette valeur lors de la création du container.
-La variable ``DATABASE_URL`` doit respecter le format suivant :
+Or nous n'avons pas défini ces variables.
+Il faut donc passer ces valeurs lors de la création du container.
 
-`postgres://user:password@host:port/dbname`
-
-Également, l'image `postgres` s'attend à avoir les variables `POSTGRES_PASSWORD` et `POSTGRES_USER` définies.
+Également, le container `database` s'attend à avoir les variables `POSTGRES_PASSWORD` et `POSTGRES_USER` définies.
 
 
 ## 6- Variables d'environnement
@@ -196,7 +197,11 @@ back:
     environment:
       - API_ENTRYPOINT=https://swapi.dev/api
       - JWT_SECRET=MyBestSecret
-      - DATABASE_URL=postgres://star_wars_user:star_wars_password@database:5432/star_wars
+      - PGDATABASE=star_wars
+      - PGUSER=star_wars_user
+      - PGPASSWORD=star_wars_password
+      - PGHOST=database
+      - PGPORT=5432
 ````
 
 Attention, dans le cas de Docker, le `hote` de la base de données doit être identique au nom du service `docker-compose`
@@ -305,7 +310,11 @@ Pour cela, modifiez les services `back` et `front`:
     environment:
       - API_ENTRYPOINT=https://swapi.dev/api
       - JWT_SECRET=MyBestSecret
-      - DATABASE_URL=postgres://star_wars_user:star_wars_password@database:5432/star_wars
+      - PGDATABASE=star_wars
+      - PGUSER=star_wars_user
+      - PGPASSWORD=star_wars_password
+      - PGHOST=database
+      - PGPORT=5432
 
   front:
     build: "front"
@@ -385,7 +394,11 @@ Pour la deuxième, modifier les services comme ceci :
     environment:
       - API_ENTRYPOINT=https://swapi.dev/api
       - JWT_SECRET=MyBestSecret
-      - DATABASE_URL=postgres://star_wars_user:star_wars_password@database:5432/star_wars
+      - PGDATABASE=star_wars
+      - PGUSER=star_wars_user
+      - PGPASSWORD=star_wars_password
+      - PGHOST=database
+      - PGPORT=5432
 
   front:
     build: "front"
@@ -429,7 +442,13 @@ FROM node:alpine
 WORKDIR "/app"
 ARG API_ENTRYPOINT=https://swapi.dev/api
 ARG JWT_SECRET=MyBestSecret
-ARG DATABASE_URL="database url de prod"
+# Remplacer ces valeurs par la base de production
+# Passer par des variables gitlab pour les données sensibles
+ARG PGDATABASE=star_wars
+ARG PGUSER=star_wars_user
+ARG PGPASSWORD=star_wars_password
+ARG PGHOST=database
+ARG PGPORT=5432
 COPY package.json .
 RUN npm install
 COPY . .
@@ -516,9 +535,9 @@ build_back:
   extends: .docker-login
   script:
     # l'option -f sert à spécifier le Dockerfile utilisé
-    - docker build -t elie91/webapp-back -f back/Dockerfile.prod  ./back
+    - docker build -t elie91/starwars-back -f back/Dockerfile.prod  ./back
     # Push l'image sur Docker Hub
-    - docker push elie91/webapp-back
+    - docker push elie91/starwars-back
   only:
     - master
 
@@ -528,9 +547,9 @@ build_front:
   extends: .docker-login
   script:
     # l'option -f sert à spécifier le Dockerfile utilisé
-    - docker build -t elie91/webapp-front -f front/Dockerfile.prod  ./front
+    - docker build -t elie91/starwars-front -f front/Dockerfile.prod  ./front
     # Push l'image sur Docker Hub
-    - docker push elie91/webapp-front
+    - docker push elie91/starwars-front
   only:
     - master
 
