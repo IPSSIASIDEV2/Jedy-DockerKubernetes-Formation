@@ -440,19 +440,14 @@ Dans le dossier back, créez un nouveau fichier appelé `Dockerfile.prod` avec l
 `````dockerfile
 FROM node:alpine
 WORKDIR "/app"
-ARG API_ENTRYPOINT=https://swapi.dev/api
-ARG JWT_SECRET=MyBestSecret
-# Remplacer ces valeurs par la base de production
-# Passer par des variables gitlab pour les données sensibles
-ARG PGDATABASE=star_wars
-ARG PGUSER=star_wars_user
-ARG PGPASSWORD=star_wars_password
-ARG PGHOST=database
-ARG PGPORT=5432
+
+# Vous pouvez ajouter ici des variables d'environnement
+# ARG API_ENTRYPOINT=https://swapi.dev/api
+
 COPY package.json .
 RUN npm install
 COPY . .
-CMD ["npm", "prod"]
+CMD ["npm", "run", "prod"]
 
 `````
 
@@ -465,7 +460,6 @@ Dans le dossier front, créez un nouveau fichier appelé `Dockerfile.prod` avec 
 
 FROM node:alpine
 WORKDIR '/app'
-ARG REACT_APP_API_ENTRYPOINT=http://localhost:4000
 COPY package.json .
 RUN npm install
 COPY . .
@@ -559,7 +553,7 @@ deploy_prod:
   script:
     - echo "Deploy to production server"
     # Nous n'irons pas plus loin
-    # Mais vous pouvez accèder à vos images de production pour les déployer sur un cloud provider
+    # Mais vous pouvez accéder à vos images de production pour les déployer sur un cloud provider
   environment:
     name: prod
     url: https://$CI_ENVIRONMENT_SLUG.$CI_PROJECT_NAME.$MY_DOMAIN

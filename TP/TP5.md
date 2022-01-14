@@ -14,12 +14,27 @@
 
 La première étape est de cloner le repo github contenant le projet.
 
-Le repo est disponible sur [ce lien](https://github.com/elie91/Jedy-StarWarsDocker)
+Le repo est disponible sur [ce lien](https://github.com/elie91/Jedy-StarWarsKubernetes)
 
-Il s'agit du projet que nous avons créé lors du TP sur Docker Compose : une application web composé d'une API Node et d'un front React,
+Il s'agit du projet que nous avions créé lors du TP sur Docker Compose : une application web composé d'une API Node et d'un front React,
 avec une base de données Postgres, le tout fonctionnant avec Docker et Docker Compose
 
 L'objectif de ce TP est de transformer ce projet en un cluster Kubernetes
+
+Voici l'architecture du cluster que nous allons mettre en place : 
+
+<img src="./pictures/kub_project_1.png" alt="drawing" width="400"/>
+
+Le trafic réseau sera géré par un service Ingress, qui va envoyer la requête au back ou au front en fonction de l'url.
+
+Le reste du cluster sera composé de : 
+* Un `Deployment` contenant 3 pods du front de notre application
+* Un `ClusterIp` pour exposer le Deployment front aux autres services
+* Un `Deployment` contenant 3 pods du back de notre application
+* Un `ClusterIp` pour exposer le back front aux autres services
+* Un `Deployment` pour postgres contenant 1 pod 
+* Un `ClusterIp` pour exposer postgres aux autres services
+* Un `PVC` (Persistent Volume Claim) pour sauvegarder la donnée écrite par la base
 
 ## 2 - Création du Deployment Front
 
