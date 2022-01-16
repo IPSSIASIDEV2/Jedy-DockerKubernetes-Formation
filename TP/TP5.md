@@ -399,6 +399,26 @@ Nous allons utiliser `Ingress` pour exposer notre application et diriger le traf
 
 ## 10 - Installation d'Ingress
 
+Dans cette section, nous allons installer `Ingress` au sein de notre cluster.  
+
+Si vous utilisez `minikube`, lancez la commande suivante : 
+
+````shell
+$ minikube addons enable ingress
+ ▪ Using image k8s.gcr.io/ingress-nginx/controller:v0.44.0
+    ▪ Using image docker.io/jettech/kube-webhook-certgen:v1.5.1
+    ▪ Using image docker.io/jettech/kube-webhook-certgen:v1.5.1
+🔎  Verifying ingress addon...
+🌟  The 'ingress' addon is enabled
+
+````
+
+Si vous utilisez `Docker Desktop`, lancez la commande suivante : 
+
+````shell
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.0/deploy/static/provider/cloud/deploy.yaml
+````
+
 ## 11 - Création de l'Ingress Controller
 
 ## 12 -Tester le cluster
