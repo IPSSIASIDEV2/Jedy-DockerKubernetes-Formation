@@ -421,7 +421,86 @@ $ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/co
 
 ## 11 - Création de l'Ingress Controller
 
+La solution que nous allons mettre en place pour diriger le trafic vers notre backend et notre frontend 
+est de les faire tourner les deux sur le même port, et de récrire l'URL lorsque la requête contient un `/api`
+dans l'URL.
+
+C'est une solution rapide et facile à mettre en place.
+
+Créez un fichier appelé `ingress-service.yaml` avec le contenu suivant :
+
+````yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-service
+  annotations:
+    # Crée un Ingress Controller basé sur Nginx
+    kubernetes.io/ingress.class: nginx
+    # Récris l'URL pour supprimer le /api lorsque front fait une requête à /api/users par exemple
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+# Spécifications
+spec:
+  rules:
+    # Règles à définir pour le site local en HTTP
+    - http:
+        paths:
+          # Pour toutes les URL contenant / (exemple /login)
+          - path: /?(.*)
+            # Spécifie le backend qui va se charger de la requête
+            backend:
+              # Pointe vers notre ClusterIp front
+              serviceName: front-cluster-ip-service
+              servicePort: 3000
+            
+          # Pour toutes les URL contenant / (exemple /api)
+          - path: /api/?(.*)
+            backend:
+              # Pointe vers notre ClusterIp back
+              serviceName: back-cluster-ip-service
+              servicePort: 4000
+
+````
+
+La dernière étape est de modifier le fichier `front-deployment.yaml` pour lui passer la variable d'environnement
+`REACT_APP_API_ENTRYPOINT`, qui sera égale à `/api`. 
+
+Ainsi, notre front enverra une requête à `/api/users` par exemple dans le cas de l'inscription. `Nginx` va supprimer 
+le `/api` et envoyer la requête `/users` au back, qui saura ensuite comment gérer cette URL
+
+
+Modifiez le fichier `front-deployment.yaml` : 
+````yaml
+          # Variables d'environnement
+          env:
+            - name: REACT_APP_API_ENTRYPOINT
+              value: /api
+````
+
 ## 12 -Tester le cluster
+
+Appliquez les modifications au cluster : 
+
+````shell
+$ kubectl apply -f front-deployment.yaml
+deployment.apps/front-deployment configured
+$ kubectl apply -f ingress-service.yaml
+ingress.networking.k8s.io/ingress-service created
+$ kubectl get ingress 
+NAME              CLASS    HOSTS   ADDRESS   PORTS   AGE
+ingress-service   <none>   *                 80      16s
+````
+
+On peut maintenant accéder à notre application sur un navigateur. 
+
+Si vous utilisez `minikube`, lancez la commande `minikube ip` puis coller l'adresse IP sur le navigateur. 
+Si vous utilisez `Docker Desktop`, vous pouvez saisir directement `localhost` sur le navigateur
+
+L'application devrait fonctionner, la communication entre notre front, back, et base de données étant bien mise en place
+
+
+Fin du TP
 
 
 
