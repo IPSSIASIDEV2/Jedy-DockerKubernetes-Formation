@@ -430,37 +430,39 @@ C'est une solution rapide et facile à mettre en place.
 Créez un fichier appelé `ingress-service.yaml` avec le contenu suivant :
 
 ````yaml
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-service
   annotations:
     # Crée un Ingress Controller basé sur Nginx
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: 'nginx'
     # Récris l'URL pour supprimer le /api lorsque front fait une requête à /api/users par exemple
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: 'true'
-# Spécifications
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   rules:
-    # Règles à définir pour le site local en HTTP
+   # Règles à définir pour le site local en HTTP
     - http:
         paths:
           # Pour toutes les URL contenant / (exemple /login)
           - path: /?(.*)
+            pathType: Prefix
             # Spécifie le backend qui va se charger de la requête
             backend:
-              # Pointe vers notre ClusterIp front
-              serviceName: front-cluster-ip-service
-              servicePort: 3000
-            
+              service:
+                name: front-cluster-ip-service
+                port:
+                  number: 3000
           # Pour toutes les URL contenant / (exemple /api)
           - path: /api/?(.*)
+            pathType: Prefix
             backend:
-              # Pointe vers notre ClusterIp back
-              serviceName: back-cluster-ip-service
-              servicePort: 4000
-
+              service:
+               # Pointe vers notre ClusterIp back
+                name: back-cluster-ip-service
+                port:
+                  number: 4000
 ````
 
 La dernière étape est de modifier le fichier `front-deployment.yaml` pour lui passer la variable d'environnement
