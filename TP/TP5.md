@@ -372,10 +372,10 @@ Nous allons maintenant corriger les `pods` de notre `back`. Pour cela, modifiez 
               value: "5432"
             # Récupère la valeur du secret
             - name: PGPASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: pgpassword
-                    key: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
 ````
 
 ````shell
